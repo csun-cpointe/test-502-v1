@@ -1,0 +1,39 @@
+aissemble-spark-history-chart:
+  service:
+    type: ClusterIP
+    hosts:
+      - host: spark-history-service.aissemble.boozallensoftware.studio
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spark-history
+                port:
+                  number: 18080
+
+  serviceAccount:
+    name: test-irsa-502
+    enabled: true
+    metadata:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::440747251814:role/eks-pod-identity-role
+
+aissemble-thrift-server-chart:
+  sparkConf: |
+    spark.hadoop.fs.s3a.endpoint=s3.amazonaws.com
+    spark.hive.metastore.warehouse.dir=s3a://aissemble-test/spark-infrastructure/warehouse
+    spark.hadoop.fs.s3.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    spark.hive.server2.thrift.port=10000
+    spark.hive.server2.thrift.http.port=10001
+    spark.hive.server2.transport.mode=http
+    spark.hadoop.fs.s3a.path.style.access=true
+    spark.hive.server2.thrift.http.path=cliservice
+    spark.hive.metastore.schema.verification=false
+    spark.hive.metastore.uris=thrift://hive-metastore-service:9083/default
+  serviceAccount:
+    name: test-irsa-502
+    enabled: true
+    metadata:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::440747251814:role/eks-pod-identity-role
